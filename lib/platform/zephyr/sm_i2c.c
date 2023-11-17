@@ -26,7 +26,7 @@ const struct device *i2c_dev = NULL;
 */
 i2c_error_t axI2CInit(void **conn_ctx, const char *pDevName)
 {
-    uint32_t i2c_cfg = I2C_SPEED_SET(I2C_SPEED_STANDARD) | I2C_MODE_MASTER;
+    uint32_t i2c_cfg = I2C_SPEED_SET(I2C_SPEED_STANDARD) | I2C_MODE_CONTROLLER;
 
     i2c_dev = device_get_binding(CONFIG_PLUGANDTRUST_I2C_PORT_NAME);
     if (!i2c_dev) {
