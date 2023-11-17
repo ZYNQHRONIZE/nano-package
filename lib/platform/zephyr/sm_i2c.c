@@ -8,7 +8,7 @@
 /* ********************** Include files ********************** */
 #include <stdlib.h>
 #include "sm_i2c.h"
-#include <drivers/i2c.h>
+#include <zephyr/drivers/i2c.h>
 
 #define PNT_LOG_REGISTER
 #include "sm_port.h"
