@@ -115,7 +115,7 @@ static bool_t phNxpEseProto7816_GetRawFrame(void *conn_ctx, uint32_t *data_len, 
  ******************************************************************************/
 static uint16_t phNxpEseProto7816_ComputeCRC(unsigned char *p_buff, uint32_t offset, uint32_t length)
 {
-    uint16_t CAL_CRC = 0xFFFF, CRC = 0x0000;
+    uint16_t CAL_CRC = 0xFFFF, CRC_VAL = 0x0000;
     uint32_t i = 0;
 
     ENSURE_OR_GO_EXIT(p_buff != NULL);
@@ -133,12 +133,12 @@ static uint16_t phNxpEseProto7816_ComputeCRC(unsigned char *p_buff, uint32_t off
     }
     CAL_CRC ^= 0xFFFF;
 #if defined(T1oI2C_UM11225)
-    CRC = ((CAL_CRC & 0xFF) << 8) | ((CAL_CRC >> 8) & 0xFF);
+    CRC_VAL = ((CAL_CRC & 0xFF) << 8) | ((CAL_CRC >> 8) & 0xFF);
 #elif defined(T1oI2C_GP1_0)
-    CRC = CAL_CRC;
+    CRC_VAL = CAL_CRC;
 #endif
 exit:
-    return (uint16_t)CRC;
+    return (uint16_t)CRC_VAL;
 }
 
 /******************************************************************************
