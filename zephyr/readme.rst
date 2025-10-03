@@ -7,7 +7,7 @@ Overview
 ===================================
 
 Plug-and-Trust nano package can be used to add the EdgeLock SE05x and A5000
-secure elements and authenticators support in Zephyr OS. (Tested with release tag - zephyr-v3.5.0)
+secure elements and authenticators support in Zephyr OS. (Tested with release tag - zephyr-v3.7.0)
 
 Refer :file:`doc/plug-and-trust-nano-package-api-doc.pdf`
 for Plug and Trust Crypto APIs.
@@ -28,7 +28,7 @@ Clone the nano package and Zephyr (required modules) as below
 
 .. note ::
 
-	The west.yml file will clone the Zephyr v3.5.0.
+	The west.yml file will clone the Zephyr v3.7.0.
 
 
 Build Options
@@ -43,6 +43,7 @@ Use the below options in prj.conf file of the example.
 	CONFIG_PLUGANDTRUST_ECKEY=y/n =============> Enable / Disable ECKey Auth support.
 	CONFIG_PLUGANDTRUST_ECKEY_SCP03=y/n =======> Enable / Disable ECKey + Platform SCP03 support.
 	CONFIG_PLUGANDTRUST_LOG_LEVEL_DBG=y/n =====> Enable / Disable Plug and Trust logs.
+	CONFIG_PLUGANDTRUST_SM_APDU_MUTEX=y/n =====> Enable / Disable Mutex at APDU Layer (Required if multiple tasks call se05x APIs).
 
 
 Use the board overlay files to set the i2c port to alias - `se05x-i2c`. Refer frdm_k64f.overlay file for reference.
@@ -64,12 +65,12 @@ Test Runner (Twister)
 Using the zephyr twister script, Plug and Trust examples / tests can be run on K64F as
 ::
 
-	python3 scripts/twister -p frdm_k64f --device-testing -device-serial <serial_port> -T ../modules/crypto/nxp-plugandtrust/ --west-flash --west-runner=jlink
+	python3 scripts/twister -p frdm_k64f --device-testing --device-serial <serial_port> -T ../modules/crypto/nxp-plugandtrust/ --west-flash --west-runner=jlink
 
 
 .. note ::
 
-	Twister script is tested with ubuntu 20.04 machine and zephyr 3.0.0.
+	Twister script is tested with ubuntu 20.04 machine and zephyr 3.7.0.
 
 
 .. _zephyr_demos:

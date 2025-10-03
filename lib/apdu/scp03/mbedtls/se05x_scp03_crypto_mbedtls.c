@@ -55,20 +55,15 @@ int hcrypto_cmac_oneshot(
     uint8_t *key, size_t keylen, uint8_t *inData, size_t inDataLen, uint8_t *outSignature, size_t *outSignatureLen)
 {
     int ret = 1;
-    mbedtls_cipher_context_t *cmac_cipher_ctx;
-    const mbedtls_cipher_info_t *cipher_info;
+    mbedtls_cipher_context_t *cmac_cipher_ctx = NULL;
+    const mbedtls_cipher_info_t *cipher_info  = NULL;
+    mbedtls_cipher_type_t cipher_type         = MBEDTLS_CIPHER_NONE;
 
     ENSURE_OR_RETURN_ON_ERROR((key != NULL), 1);
     ENSURE_OR_RETURN_ON_ERROR((inData != NULL), 1);
     ENSURE_OR_RETURN_ON_ERROR((outSignature != NULL), 1);
     ENSURE_OR_RETURN_ON_ERROR((outSignatureLen != NULL), 1);
 
-    cmac_cipher_ctx = mbedtls_calloc(1, sizeof(mbedtls_cipher_context_t));
-    if (cmac_cipher_ctx == NULL) {
-        return 1;
-    }
-
-    mbedtls_cipher_type_t cipher_type = MBEDTLS_CIPHER_NONE;
     switch (keylen * 8) {
     case 128:
         cipher_type = MBEDTLS_CIPHER_AES_128_ECB;
@@ -77,9 +72,18 @@ int hcrypto_cmac_oneshot(
         goto exit;
     }
 
-    cipher_info = mbedtls_cipher_info_from_type(cipher_type);
-    if (cipher_info != NULL) {
+    if(cipher_type != MBEDTLS_CIPHER_NONE){
+        cipher_info = mbedtls_cipher_info_from_type(cipher_type);
+    }
+
+    if(cipher_info != NULL){
+        cmac_cipher_ctx = mbedtls_calloc(1, sizeof(mbedtls_cipher_context_t));
+        if (cmac_cipher_ctx == NULL) {
+            return 1;
+        }
+
         mbedtls_cipher_init(cmac_cipher_ctx);
+
         ret = mbedtls_cipher_setup(cmac_cipher_ctx, cipher_info);
         if (ret != 0) {
             goto exit;
@@ -99,7 +103,12 @@ int hcrypto_cmac_oneshot(
     }
 
 exit:
-    mbedtls_cipher_free(cmac_cipher_ctx);
+    if(cmac_cipher_ctx != NULL){
+        if(cmac_cipher_ctx->cipher_info != NULL){
+            mbedtls_cipher_free(cmac_cipher_ctx);
+        }
+        mbedtls_free(cmac_cipher_ctx);
+    }
     return ret;
 }
 
@@ -107,7 +116,7 @@ void *hcrypto_cmac_setup(uint8_t *key, size_t keylen)
 {
     int ret = 1;
 
-    mbedtls_cipher_context_t *cmac_cipher_ctx;
+    mbedtls_cipher_context_t *cmac_cipher_ctx = NULL;
     const mbedtls_cipher_info_t *cipher_info = NULL;
     mbedtls_cipher_type_t cipher_type        = MBEDTLS_CIPHER_NONE;
 
@@ -133,13 +142,19 @@ void *hcrypto_cmac_setup(uint8_t *key, size_t keylen)
 
         ret = mbedtls_cipher_setup(cmac_cipher_ctx, cipher_info);
         if (ret != 0) {
-            mbedtls_cipher_free((mbedtls_cipher_context_t *)cmac_cipher_ctx);
+            if(cmac_cipher_ctx->cipher_info != NULL){
+                mbedtls_cipher_free(cmac_cipher_ctx);
+            }
+            mbedtls_free(cmac_cipher_ctx);
             return NULL;
         }
 
         ret = mbedtls_cipher_cmac_starts(cmac_cipher_ctx, key, keylen * 8);
         if (ret != 0) {
-            mbedtls_cipher_free(cmac_cipher_ctx);
+            if(cmac_cipher_ctx->cipher_info != NULL){
+                mbedtls_cipher_free(cmac_cipher_ctx);
+            }
+            mbedtls_free(cmac_cipher_ctx);
             return NULL;
         }
     }
@@ -149,6 +164,7 @@ void *hcrypto_cmac_setup(uint8_t *key, size_t keylen)
 
 int hcrypto_cmac_init(void *cmac_cipher_ctx)
 {
+    (void)cmac_cipher_ctx;
     return 0;
 }
 
@@ -159,8 +175,15 @@ int hcrypto_cmac_update(void *cmac_cipher_ctx, uint8_t *inData, size_t inDataLen
     ENSURE_OR_RETURN_ON_ERROR((cmac_cipher_ctx != NULL), 1);
     ENSURE_OR_RETURN_ON_ERROR((inData != NULL), 1);
 
-    ret = mbedtls_cipher_cmac_update((mbedtls_cipher_context_t *)cmac_cipher_ctx, inData, inDataLen);
-    ENSURE_OR_RETURN_ON_ERROR((ret == 0), 1);
+    mbedtls_cipher_context_t *cmac_ctx = (mbedtls_cipher_context_t *)cmac_cipher_ctx;
+
+    ret = mbedtls_cipher_cmac_update(cmac_ctx, inData, inDataLen);
+    if(ret != 0)
+    {
+        mbedtls_cipher_free(cmac_ctx);
+        mbedtls_free(cmac_ctx);
+        return 1;
+    }
 
     return 0;
 }
@@ -181,6 +204,8 @@ int hcrypto_cmac_final(void *cmac_cipher_ctx, uint8_t *outSignature, size_t *out
 
     mbedtls_cipher_free(cmac_ctx);
 
+    mbedtls_free(cmac_ctx);
+
     ENSURE_OR_RETURN_ON_ERROR((ret == 0), 1);
 
     return 0;
@@ -191,13 +216,14 @@ int hcrypto_aes_cbc_encrypt(
 {
     int ret = 0;
     mbedtls_aes_context aes_ctx;
+    (void)ivLen;
+
+    mbedtls_aes_init(&aes_ctx);
 
     ENSURE_OR_RETURN_ON_ERROR((key != NULL), 1);
     ENSURE_OR_RETURN_ON_ERROR((iv != NULL), 1);
     ENSURE_OR_RETURN_ON_ERROR((srcData != NULL), 1);
     ENSURE_OR_RETURN_ON_ERROR((destData != NULL), 1);
-
-    mbedtls_aes_init(&aes_ctx);
 
     ret = mbedtls_aes_setkey_enc(&aes_ctx, key, (unsigned int)(keylen * 8));
     ENSURE_OR_GO_EXIT(ret == 0);
@@ -215,15 +241,16 @@ int hcrypto_aes_cbc_decrypt(
 {
     int ret = 0;
     mbedtls_aes_context aes_ctx;
+    (void)ivLen;
+
+    mbedtls_aes_init(&aes_ctx);
 
     ENSURE_OR_RETURN_ON_ERROR((key != NULL), 1);
     ENSURE_OR_RETURN_ON_ERROR((iv != NULL), 1);
     ENSURE_OR_RETURN_ON_ERROR((srcData != NULL), 1);
     ENSURE_OR_RETURN_ON_ERROR((destData != NULL), 1);
 
-    mbedtls_aes_init(&aes_ctx);
-
-    mbedtls_aes_setkey_dec(&aes_ctx, key, (unsigned int)(keylen * 8));
+    ret = mbedtls_aes_setkey_dec(&aes_ctx, key, (unsigned int)(keylen * 8));
     ENSURE_OR_GO_EXIT(ret == 0);
 
     ret = mbedtls_aes_crypt_cbc(&aes_ctx, MBEDTLS_AES_DECRYPT, dataLen, iv, srcData, destData);
@@ -234,13 +261,14 @@ exit:
     return ret;
 }
 
-void *hcrypto_gen_eckey()
+void *hcrypto_gen_eckey(uint16_t keylen)
 {
     int ret                            = 1;
     const char pers[]                  = "gen_key";
     mbedtls_pk_context *pKey           = NULL;
     mbedtls_entropy_context *entropy   = NULL;
     mbedtls_ctr_drbg_context *ctr_drbg = NULL;
+    int curve_id                       = 0;
 
     pKey = mbedtls_calloc(1, sizeof(mbedtls_pk_context));
     ENSURE_OR_GO_EXIT(pKey != NULL);
@@ -261,7 +289,17 @@ void *hcrypto_gen_eckey()
     ret = mbedtls_ctr_drbg_seed(ctr_drbg, mbedtls_entropy_func, entropy, (const unsigned char *)pers, sizeof(pers) - 1);
     ENSURE_OR_GO_EXIT(ret == 0);
 
-    ret = mbedtls_ecp_gen_key(MBEDTLS_ECP_DP_SECP256R1, mbedtls_pk_ec(*pKey), mbedtls_ctr_drbg_random, ctr_drbg);
+    curve_id = (keylen == 32) ? MBEDTLS_ECP_DP_SECP256R1 :
+               (keylen == 48) ? MBEDTLS_ECP_DP_SECP384R1 :
+                                0; // Handle unsupported key length
+
+    if (curve_id == 0) {
+        SMLOG_E("Key length not supported.");
+        ret = 1;
+        goto exit;
+    }
+
+    ret = mbedtls_ecp_gen_key(curve_id, mbedtls_pk_ec(*pKey), mbedtls_ctr_drbg_random, ctr_drbg);
     ENSURE_OR_GO_EXIT(ret == 0);
 
     ret = 0;
@@ -282,13 +320,14 @@ void hcrypto_free_eckey(void *eckey)
     mbedtls_pk_context *pkey = (mbedtls_pk_context *)eckey;
     if (pkey != NULL) {
         mbedtls_pk_free(pkey);
+        mbedtls_free(pkey);
     }
 }
 
 void *hcrypto_set_eckey(uint8_t *Buf, size_t Len, int isPrivate)
 {
-    int ret                = 1;
-    mbedtls_pk_context *pK = NULL;
+    int ret                              = 1;
+    mbedtls_pk_context *pK               = NULL;
 
     ENSURE_OR_RETURN_ON_ERROR(Buf != NULL, NULL);
 
@@ -303,6 +342,7 @@ void *hcrypto_set_eckey(uint8_t *Buf, size_t Len, int isPrivate)
         ret = mbedtls_pk_parse_public_key(pK, Buf, Len);
         ENSURE_OR_GO_EXIT(ret == 0);
     }
+
     ret = 0;
 exit:
     return (void *)pK;
@@ -322,7 +362,7 @@ int hcrypto_get_publickey(void *privkey, uint8_t *data, size_t *dataLen)
     pkey = (mbedtls_pk_context *)privkey;
 
     ret = mbedtls_pk_write_pubkey_der(pkey, output, sizeof(output));
-    if (ret > 0) {
+    if (ret > 0 && (size_t)ret <= sizeof(output)) {
         *dataLen = ret;
         /* Data is put at end, so copy it to front of output buffer */
         c = output + sizeof(output) - ret;
@@ -388,6 +428,7 @@ int hcrypto_derive_dh(pSe05xSession_t session_ctx,
     int ret                                    = 1;
     size_t keyLen                              = 0;
     const char pers[]                          = "Derive_dh";
+    void * sePubkey                            = NULL;
     const mbedtls_ecp_curve_info *p_curve_info = NULL;
     /*Key pair*/
     mbedtls_pk_context *pKeyPrv  = NULL;
@@ -398,6 +439,8 @@ int hcrypto_derive_dh(pSe05xSession_t session_ctx,
     mbedtls_entropy_context *entropy   = NULL;
     mbedtls_ctr_drbg_context *ctr_drbg = NULL;
     mbedtls_mpi rawSharedData;
+
+    mbedtls_mpi_init(&rawSharedData);
 
     ENSURE_OR_RETURN_ON_ERROR(session_ctx != NULL, 1);
     ENSURE_OR_RETURN_ON_ERROR(HostKeyPair != NULL, 1);
@@ -418,7 +461,7 @@ int hcrypto_derive_dh(pSe05xSession_t session_ctx,
     ENSURE_OR_GO_EXIT(ret == 0);
 
     /*Set Public key*/
-    void *sePubkey = hcrypto_set_eckey(pubkey, pubkeyLen, 0);
+    sePubkey = hcrypto_set_eckey(pubkey, pubkeyLen, 0);
     ENSURE_OR_GO_EXIT(sePubkey != NULL);
 
     pKeyExt = (mbedtls_pk_context *)sePubkey;
@@ -428,8 +471,6 @@ int hcrypto_derive_dh(pSe05xSession_t session_ctx,
     pKeyPrv = (mbedtls_pk_context *)HostKeyPair;
     pEcpPrv = mbedtls_pk_ec(*pKeyPrv);
     ENSURE_OR_GO_EXIT(pEcpPrv);
-
-    mbedtls_mpi_init(&rawSharedData);
 
     p_curve_info = mbedtls_ecp_curve_info_from_grp_id(pEcpPrv->grp.id);
     ENSURE_OR_GO_EXIT(p_curve_info != NULL);
@@ -451,6 +492,11 @@ exit:
     if (pEcpExt != NULL) {
         mbedtls_ecp_keypair_free(pEcpExt);
     }
+    if(pKeyExt != NULL)
+    {
+        mbedtls_pk_free(pKeyExt);
+        mbedtls_free(pKeyExt);
+    }
     if (entropy != NULL) {
         mbedtls_entropy_free(entropy);
         mbedtls_free(entropy);
@@ -459,6 +505,7 @@ exit:
         mbedtls_ctr_drbg_free(ctr_drbg);
         mbedtls_free(ctr_drbg);
     }
+    mbedtls_mpi_free(&rawSharedData);
     return ret;
 }
 
