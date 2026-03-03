@@ -4,22 +4,22 @@
 #	 	Integrating EdgeLock® SE05X to FRDM-MCX-A development boards
 
 
-This demo project provides a detailed information on how to integrate the EdgeLock® SE05X Secure Element family and EdgeLock® A5000 into the FRDM development boards of MCX-A family. 
+This demo project provides a detailed information on how to integrate the EdgeLock® SE05X Secure Element family and EdgeLock® A5000 into the FRDM development boards of MCX-A family.
 Additionally, the project contains several demo applications to showcase how to enable security on the MCX family. 
 
-A ***Secure Element (SE)*** and ***Secure Authenticator (SA)*** are discrete companion chips which can be connected to any MPU or MCU.  
+A ***Secure Element (SE)*** and ***Secure Authenticator (SA)*** are discrete companion chips which can be connected to any MPU or MCU.
 It has its own powerful core that can perform advanced cryptographic functionalities and protocols.
-Both chips are resistant to advanced hardware and software attacks and can be certified with the highest security level. 
-Applications which may require a secure element are data-sensitive and critical applications which involve payments, personal information, 
-access control systems, government communications and many more. 
+Both chips are resistant to advanced hardware and software attacks and can be certified with the highest security level.
+Applications which may require a secure element are data-sensitive and critical applications which involve payments, personal information,
+access control systems, government communications and many more.
 NXPs EdgeLock Secure Elements come with broad crypto functionality, and are certified and easy to scale across architectures.
 
-![](./images/SE050_A5000_chip.png) 
+![](./images/SE050_A5000_chip.png)
 
 ### Connecting an external Secure Element or Secure Authenticator to an existing system
 
-A SE and SA can be easily connected to any system, as the requirements are minimal- only power and two pins for I2C are required. 
-A SE/SA can share I2C bus with other ICs, and an I2C bus can be SW emulated using 2 GPIOs. 
+A SE and SA can be easily connected to any system, as the requirements are minimal- only power and two pins for I2C are required.
+A SE/SA can share I2C bus with other ICs, and an I2C bus can be SW emulated using 2 GPIOs.
 Additionally, it is easy to integrate thanks to the support of the Plug&Trust Middleware for the software on the host.
 
 <p align="center">
@@ -27,7 +27,7 @@ Additionally, it is easy to integrate thanks to the support of the Plug&Trust Mi
 </p>
 
 Any platform can connect to the secure element due to minimal requirements
-> Hardware integration: 
+> Hardware integration:
 > -	Only power and two pins for I2C are required
 > - Secure element can share I2C bus with other ICs
 > - I2C bus can be SW emulated using 2 GPIOs
@@ -52,7 +52,7 @@ Any platform can connect to the secure element due to minimal requirements
 #### Boards: [FRDM-MCXA153](https://www.nxp.com/design/design-center/development-boards-and-designs/general-purpose-mcus/frdm-development-board-for-mcx-a14x-a15x-mcus:FRDM-MCXA153)
 
 #### Expansion Boards: [OM-A5000ARD](https://www.nxp.com/products/security-and-authentication/authentication/development-board-for-edgelock-a5000-secure-authenticator:OM-A5000ARD), [OM-SE050ARD-E](https://www.nxp.com/products/security-and-authentication/authentication/edgelock-se050-development-kits:OM-SE050X), [OM-SE051ARD](https://www.nxp.com/products/security-and-authentication/authentication/edgelock-se051-development-kit:OM-SE051ARD)
-#### Categories: Industrial, Secure Provisioning, Security, Cloud Connected Devices	
+#### Categories: Industrial, Secure Provisioning, Security, Cloud Connected Devices
 #### Peripherals: I2C
 #### Toolchains: MCUXpresso IDE
 
@@ -61,7 +61,7 @@ Any platform can connect to the secure element due to minimal requirements
 2. [Hardware](#step2)
 3. [Setup](#step3)
 4. [Results](#step4)
-5. [FAQs](#step5) 
+5. [FAQs](#step5)
 6. [Support](#step6)
 7. [Release Notes](#step7)
 
@@ -69,7 +69,7 @@ Below the steps necessary to run the nano lib cryptography example on FRDM-MCXA1
 
 ## 1. Software<a name="step1"></a>
 - Install latest MCUxpresso from https://nxp.com/mcuxpresso.
-- Download mcxa153 SDK **version 2.16.100** from https://mcuxpresso.nxp.com/en/select. 
+- Download mcxa153 SDK **version 25.06.00** from https://mcuxpresso.nxp.com/en/select.
 - Download the latest Plug & Trust Se05x nano library from https://github.com/NXPPlugNTrust/nano-package/
 
 
@@ -108,7 +108,7 @@ Unzip and place the MCX SDK in parallel to the nano package as shown in the imag
 3. Select the Project and click on Finish
 ![](./images/mcxa_import.png)
 
-### 3.3 Build options 
+### 3.3 Build options
 
 No build options, currently only build without Platform SCP and EC Key authentication is supported.
 
@@ -121,21 +121,21 @@ Click on Build and then Debug on the Quickstart panel to Build and Debug your pr
 Executing the example results in output like this, showing the operations done with the secure element:
 
 	Se05x crypto Example !
-	Plug and Trust nano package - version: 1.3.0 
-	Get Version ==> 
-	Applet Version 7.2.0 
-	ex_get_version, PASSED 
-	ex_generate_nist256_key, PASSED 
-	ex_set_get_nist256_key, PASSED 
-	ex_nist256_sign_verify, PASSED 
-	ex_set_certificate, PASSED 
-	ex_ecdh, PASSED 
-	ex_aes_ECB_NOPAD, PASSED 
-	ex_aes_CBC_NOPAD, PASSED 
-	ex_aes_CTR, PASSED 
-	ex_nist256_sign_policy, PASSED 
+	Plug and Trust nano package - version: 1.3.0
+	Get Version ==>
+	Applet Version 7.2.0
+	ex_get_version, PASSED
+	ex_generate_nist256_key, PASSED
+	ex_set_get_nist256_key, PASSED
+	ex_nist256_sign_verify, PASSED
+	ex_set_certificate, PASSED
+	ex_ecdh, PASSED
+	ex_aes_ECB_NOPAD, PASSED
+	ex_aes_CBC_NOPAD, PASSED
+	ex_aes_CTR, PASSED
+	ex_nist256_sign_policy, PASSED
 	Close i2c device 3.
-	SE05x crypto Example Success ! 
+	SE05x crypto Example Success !
 
 
 ## 5. FAQs<a name="step5"></a>
