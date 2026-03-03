@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014,2018-2019,2022 NXP
+ * Copyright 2010-2014,2018-2019,2022,2026 NXP
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,8 +51,8 @@
  * PHESESTATUS
  * Get grp_retval from Status Code
  */
-#define PHESESTATUS(phEseStatus) ((phEseStatus)&0x00FFU)
-#define PHESECID(phEseStatus) (((phEseStatus)&0xFF00U) >> 8)
+#define PHESESTATUS(phEseStatus) ((phEseStatus) & 0x00FFU)
+#define PHESECID(phEseStatus) (((phEseStatus) & 0xFF00U) >> 8)
 
 /*
  *  Status Codes

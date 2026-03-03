@@ -1,6 +1,6 @@
 /*
  *
- * Copyright 2017-2020,2022,2024 NXP
+ * Copyright 2017-2020,2022,2024,2026 NXP
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -15,7 +15,7 @@
 #include "pin_mux.h"
 #include "sm_timer.h"
 
-#if (EX_SE05X_USE_MBEDTLS)
+#if (EX_SE05X_USE_MBEDTLS2X)
 #include "ksdk_mbedtls.h"
 #endif
 
@@ -50,7 +50,7 @@ void platformInit()
     axReset_HostConfigure();
     axReset_PowerUp();
 
-#if (EX_SE05X_USE_MBEDTLS)
+#if (EX_SE05X_USE_MBEDTLS2X)
     CRYPTO_InitHardware();
 #if defined(FSL_FEATURE_SOC_SHA_COUNT) && (FSL_FEATURE_SOC_SHA_COUNT > 0)
     CLOCK_EnableClock(kCLOCK_Sha0);

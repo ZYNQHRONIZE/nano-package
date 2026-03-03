@@ -1,6 +1,6 @@
 /*
  *
- * Copyright 2016-2018,2020,2022 NXP
+ * Copyright 2016-2018,2020,2022,2026 NXP
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -63,28 +63,11 @@
 #define DEBUG_PRINT_KINETIS_I2C(Operation, status)
 #endif
 
-/* Handle NAK from the A71CH */
-static int gBackoffDelay;
-
-void axI2CResetBackoffDelay()
-{
-    gBackoffDelay = 0;
-}
-
-static void BackOffDelay_Wait()
-{
-    if (gBackoffDelay < 200) {
-        gBackoffDelay += 1;
-    }
-    sm_sleep(gBackoffDelay);
-}
-
 static i2c_error_t kinetisI2cStatusToAxStatus(status_t kinetis_i2c_status)
 {
     i2c_error_t retStatus;
     switch (kinetis_i2c_status) {
     case kStatus_Success:
-        axI2CResetBackoffDelay();
         retStatus = I2C_OK;
         break;
     case kStatus_I2C_Busy:
@@ -103,7 +86,6 @@ static i2c_error_t kinetisI2cStatusToAxStatus(status_t kinetis_i2c_status)
         retStatus = I2C_TIME_OUT;
         break;
     case kStatus_I2C_Addr_Nak:
-        BackOffDelay_Wait();
         retStatus = I2C_NACK_ON_ADDRESS;
         break;
     default:

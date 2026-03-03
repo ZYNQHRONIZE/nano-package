@@ -3,4 +3,6 @@
 .settings
 MCXN947_se05x_eckey_session_provision LinkServer Debug.launch
 MCXN947_se05x_eckey_session_provision LinkServer Release.launch
+MCXN947_se05x_eckey_session_provision jLink Debug.launch
+MCXN947_se05x_eckey_session_provision jLink Release.launch
 script.jlink

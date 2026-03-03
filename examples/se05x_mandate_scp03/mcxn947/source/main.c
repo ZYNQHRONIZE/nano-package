@@ -6,6 +6,11 @@
  *
  */
 
+#if defined(WITH_PlatformSCPRequest_NOT_REQUIRED) && \
+    !(defined(WITH_PLATFORM_SCP03) || defined(WITH_ECKEY_SCP03_SESSION))
+#error "WITH_PLATFORM_SCP03" or "WITH_ECKEY_SCP03_SESSION" has to be defined with "WITH_PlatformSCPRequest_NOT_REQUIRED"
+#endif
+
 /* ********************** Include files ********************** */
 #include <stdio.h>
 #include "fsl_debug_console.h"

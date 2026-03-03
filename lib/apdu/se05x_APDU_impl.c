@@ -1,7 +1,7 @@
 /** @file se05x_APDU_impl.c
  *  @brief Se05x APDU function implementation.
  *
- * Copyright 2021,2022,2024 NXP
+ * Copyright 2021,2022,2024,2026 NXP
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -1118,6 +1118,89 @@ smStatus_t Se05x_API_ReadObject_W_Attst(pSe05xSession_t session_ctx,
     }
     else {
         *pRspBufLen = 0;
+    }
+
+cleanup:
+    return retStatus;
+}
+
+smStatus_t Se05x_API_PBKDF2_extended(pSe05xSession_t session_ctx,
+    uint32_t objectID,
+    const uint8_t *salt,
+    size_t saltLen,
+    uint32_t saltID,
+    uint16_t count,
+    SE05x_MACAlgo_t macAlgo,
+    uint16_t requestedLen,
+    uint32_t derivedSessionKeyID,
+    uint8_t *derivedSessionKey,
+    size_t *pderivedSessionKeyLen)
+{
+    smStatus_t retStatus = SM_NOT_OK;
+    tlvHeader_t hdr      = {{kSE05x_CLA, kSE05x_INS_CRYPTO, kSE05x_P1_DEFAULT, kSE05x_P2_PBKDF}};
+    size_t cmdbufLen     = 0;
+    uint8_t *pCmdbuf     = &session_ctx->apdu_buffer[0];
+    int tlvRet           = 0;
+    size_t rspIndex      = 0;
+    uint8_t *pRspbuf     = &session_ctx->apdu_buffer[0];
+    size_t rspbufLen     = sizeof(session_ctx->apdu_buffer);
+
+    ENSURE_OR_GO_CLEANUP(session_ctx != NULL);
+
+    SMLOG_D("APDU - Se05x_API_PBKDF2_extended [] \n");
+
+    tlvRet = TLVSET_U32(
+        "4-byte password identifier (object type must be HMACKey)", &pCmdbuf, &cmdbufLen, kSE05x_TAG_1, objectID);
+    if (0 != tlvRet) {
+        goto cleanup;
+    }
+    tlvRet = TLVSET_u8bufOptional("salt", &pCmdbuf, &cmdbufLen, kSE05x_TAG_2, salt, saltLen);
+    if (0 != tlvRet) {
+        goto cleanup;
+    }
+    tlvRet = TLVSET_U16("count", &pCmdbuf, &cmdbufLen, kSE05x_TAG_3, count);
+    if (0 != tlvRet) {
+        goto cleanup;
+    }
+    tlvRet = TLVSET_U16("requestedLen", &pCmdbuf, &cmdbufLen, kSE05x_TAG_4, requestedLen);
+    if (0 != tlvRet) {
+        goto cleanup;
+    }
+    tlvRet = TLVSET_U8("MacAlgo", &pCmdbuf, &cmdbufLen, kSE05x_TAG_5, macAlgo);
+    if (0 != tlvRet) {
+        goto cleanup;
+    }
+    if (salt == NULL) {
+        tlvRet = TLVSET_U32("saltID", &pCmdbuf, &cmdbufLen, kSE05x_TAG_6, saltID);
+        if (0 != tlvRet) {
+            goto cleanup;
+        }
+    }
+    if (derivedSessionKey == NULL) {
+        tlvRet = TLVSET_U32("derivedSessionKeyID", &pCmdbuf, &cmdbufLen, kSE05x_TAG_7, derivedSessionKeyID);
+        if (0 != tlvRet) {
+            goto cleanup;
+        }
+    }
+    retStatus = DoAPDUTxRx(session_ctx, &hdr, &session_ctx->apdu_buffer[0], cmdbufLen, pRspbuf, &rspbufLen, 0);
+    if (retStatus == SM_OK) {
+        if (derivedSessionKey == NULL) {
+            retStatus = SM_NOT_OK;
+            if (2 == rspbufLen) {
+                retStatus = (smStatus_t)((pRspbuf[0] << 8) | (pRspbuf[1]));
+            }
+        }
+        else {
+            retStatus = SM_NOT_OK;
+            tlvRet =
+                tlvGet_u8buf(pRspbuf, &rspIndex, rspbufLen, kSE05x_TAG_1, derivedSessionKey, pderivedSessionKeyLen);
+            if (0 != tlvRet) {
+                goto cleanup;
+            }
+            if ((rspIndex + 2) == rspbufLen) {
+                retStatus = (smStatus_t)((pRspbuf[rspIndex] << 8) | (pRspbuf[rspIndex + 1]));
+            }
+        }
     }
 
 cleanup:

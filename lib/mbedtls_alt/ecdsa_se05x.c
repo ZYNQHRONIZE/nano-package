@@ -4,7 +4,7 @@
  * @version 1.0
  * @par License
  *
- * Copyright 2022,2024 NXP
+ * Copyright 2022,2024,2026 NXP
  * SPDX-License-Identifier: Apache-2.0
  *
  * @par Description
@@ -43,7 +43,6 @@ extern int mbedtls_ecdsa_sign_o(mbedtls_ecp_group *grp,
     int (*f_rng)(void *, unsigned char *, size_t),
     void *p_rng);
 
-
 int mbedtls_ecdsa_sign(mbedtls_ecp_group *grp,
     mbedtls_mpi *r,
     mbedtls_mpi *s,
@@ -57,17 +56,17 @@ int mbedtls_ecdsa_sign(mbedtls_ecp_group *grp,
 
     smStatus_t status = SM_NOT_OK;
     SE05x_Result_t result;
-    uint32_t keyID          = 0;
-    uint8_t magic_bytes[]   = ALT_KEYS_MAGIC;
-    uint8_t buffer[150]     = {0};
-    uint8_t signature[128]  = {0};
-    size_t signature_len    = sizeof(signature);
+    uint32_t keyID           = 0;
+    uint8_t magic_bytes[]    = ALT_KEYS_MAGIC;
+    uint8_t buffer[150]      = {0};
+    uint8_t signature[128]   = {0};
+    size_t signature_len     = sizeof(signature);
     const unsigned char *end = NULL;
-    unsigned char *p = NULL;
-    size_t len = 0;
-    size_t rawPrivatekeylen = d->n * sizeof(mbedtls_mpi_uint);
+    unsigned char *p         = NULL;
+    size_t len               = 0;
+    size_t rawPrivatekeylen  = d->n * sizeof(mbedtls_mpi_uint);
 
-    int ret                 = mbedtls_mpi_write_binary(d, buffer, rawPrivatekeylen);
+    int ret = mbedtls_mpi_write_binary(d, buffer, rawPrivatekeylen);
     if (ret != 0) {
         SMLOG_E("Error %d\r\n", ret);
         return -1;
@@ -113,10 +112,9 @@ int mbedtls_ecdsa_sign(mbedtls_ecp_group *grp,
     }
 
     end = signature + signature_len;
-    p = (unsigned char *) signature;
+    p   = (unsigned char *)signature;
 
-    if ((ret = mbedtls_asn1_get_tag(&p, end, &len,
-                                MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE)) != 0) {
+    if ((ret = mbedtls_asn1_get_tag(&p, end, &len, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE)) != 0) {
         SMLOG_E("Error in mbedtls_asn1_get_tag \n");
         goto exit;
     }
@@ -126,14 +124,14 @@ int mbedtls_ecdsa_sign(mbedtls_ecp_group *grp,
         goto exit;
     }
 
-    ret  = mbedtls_asn1_get_mpi(&p, end, r);
-    if (ret != 0){
+    ret = mbedtls_asn1_get_mpi(&p, end, r);
+    if (ret != 0) {
         SMLOG_E("Error in mbedtls_asn1_get_mpi \n");
         goto exit;
     }
 
     ret = mbedtls_asn1_get_mpi(&p, end, s);
-    if (ret != 0){
+    if (ret != 0) {
         SMLOG_E("Error in mbedtls_asn1_get_mpi \n");
         goto exit;
     }

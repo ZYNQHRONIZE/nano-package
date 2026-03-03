@@ -19,7 +19,6 @@ uint8_t scp03_enc_key[16] = {
 uint8_t scp03_mac_key[16] = {
     0xAB, 0xCD, 0xAB, 0xCD, 0xAB, 0xCD, 0xAB, 0xCD, 0xAB, 0xCD, 0xAB, 0xCD, 0xAB, 0xCD, 0x00, 0x02};
 
-
 #define POLICY_BUF_LEN 9
 #define POLICY_BUF_POLICY_LEN 8
 #define POLICY_BUF_POLICY_OFFSET 5
@@ -91,7 +90,7 @@ uint8_t ec_auth_key[] = { \
     0xF3, 0xB9, 0xCA, 0xC2, 0xFC, 0x63, 0x25, 0x51
 #define PUBLIC_KEY_LENGTH 65
 #define PUBLIC_KEY_OFFSET 73
-#define PUBLIC_KEY_TYPE   kSE05x_ECCurve_NIST_P256
+#define PUBLIC_KEY_TYPE kSE05x_ECCurve_NIST_P256
 
 #else
 
@@ -169,7 +168,7 @@ uint8_t ec_auth_key[] = { \
     0xEC, 0xEC, 0x19, 0x6A, 0xCC, 0xC5, 0x29, 0x73
 #define PUBLIC_KEY_LENGTH 97
 #define PUBLIC_KEY_OFFSET 88
-#define PUBLIC_KEY_TYPE   kSE05x_ECCurve_NIST_P384
+#define PUBLIC_KEY_TYPE kSE05x_ECCurve_NIST_P384
 
 #endif
 
@@ -200,51 +199,71 @@ smStatus_t ex_se05x_create_curve(uint32_t curve_id)
     const uint8_t ecc_ordern[] = {EC_PARAM_order};
 
     status = Se05x_API_CreateECCurve(&se05x_session, (SE05x_ECCurve_t)curve_id);
-    if(status != SM_OK) {
+    if (status != SM_OK) {
         return status;
     }
-    status = Se05x_API_SetECCurveParam(&se05x_session, (SE05x_ECCurve_t)curve_id, kSE05x_ECCurveParam_PARAM_A, ecc_a, sizeof(ecc_a)/sizeof(ecc_a[0]));
-    if(status != SM_OK) {
+    status = Se05x_API_SetECCurveParam(&se05x_session,
+        (SE05x_ECCurve_t)curve_id,
+        kSE05x_ECCurveParam_PARAM_A,
+        ecc_a,
+        sizeof(ecc_a) / sizeof(ecc_a[0]));
+    if (status != SM_OK) {
         return status;
     }
-    status = Se05x_API_SetECCurveParam(&se05x_session, (SE05x_ECCurve_t)curve_id, kSE05x_ECCurveParam_PARAM_B, ecc_b, sizeof(ecc_b)/sizeof(ecc_b[0]));
-    if(status != SM_OK) {
+    status = Se05x_API_SetECCurveParam(&se05x_session,
+        (SE05x_ECCurve_t)curve_id,
+        kSE05x_ECCurveParam_PARAM_B,
+        ecc_b,
+        sizeof(ecc_b) / sizeof(ecc_b[0]));
+    if (status != SM_OK) {
         return status;
     }
-    status = Se05x_API_SetECCurveParam(&se05x_session, (SE05x_ECCurve_t)curve_id, kSE05x_ECCurveParam_PARAM_G, ecc_G, sizeof(ecc_G)/sizeof(ecc_G[0]));
-    if(status != SM_OK) {
+    status = Se05x_API_SetECCurveParam(&se05x_session,
+        (SE05x_ECCurve_t)curve_id,
+        kSE05x_ECCurveParam_PARAM_G,
+        ecc_G,
+        sizeof(ecc_G) / sizeof(ecc_G[0]));
+    if (status != SM_OK) {
         return status;
     }
-    status = Se05x_API_SetECCurveParam(&se05x_session, (SE05x_ECCurve_t)curve_id, kSE05x_ECCurveParam_PARAM_N, ecc_ordern, sizeof(ecc_ordern)/sizeof(ecc_ordern[0]));
-    if(status != SM_OK) {
+    status = Se05x_API_SetECCurveParam(&se05x_session,
+        (SE05x_ECCurve_t)curve_id,
+        kSE05x_ECCurveParam_PARAM_N,
+        ecc_ordern,
+        sizeof(ecc_ordern) / sizeof(ecc_ordern[0]));
+    if (status != SM_OK) {
         return status;
     }
-    status = Se05x_API_SetECCurveParam(&se05x_session, (SE05x_ECCurve_t)curve_id, kSE05x_ECCurveParam_PARAM_PRIME, ecc_prime, sizeof(ecc_prime)/sizeof(ecc_prime[0]));
+    status = Se05x_API_SetECCurveParam(&se05x_session,
+        (SE05x_ECCurve_t)curve_id,
+        kSE05x_ECCurveParam_PARAM_PRIME,
+        ecc_prime,
+        sizeof(ecc_prime) / sizeof(ecc_prime[0]));
     return status;
 }
 
 int se05x_eckey_session_provision(void)
 {
     smStatus_t status;
-    SE05x_ECCurve_t curveID = PUBLIC_KEY_TYPE;
+    SE05x_ECCurve_t curveID  = PUBLIC_KEY_TYPE;
     SE05x_Result_t objExists = kSE05x_Result_NA;
-    uint16_t attempt = 0;
-    uint8_t curveList[32] = {
+    uint16_t attempt         = 0;
+    uint8_t curveList[32]    = {
         0,
     };
     size_t curveListLen = 32;
 
     /* Policy for auth object */
-    uint32_t delete_policy = POLICY_OBJ_ALLOW_DELETE;
-    uint8_t policy_buf[POLICY_BUF_LEN] = {0};
-    Se05xPolicy_t policy_for_auth_obj = {0};
-    policy_buf[0] = POLICY_BUF_POLICY_LEN;
-    policy_buf[POLICY_BUF_POLICY_OFFSET]   = (uint8_t)((delete_policy & 0xFF000000) >> (8 * 3));
-    policy_buf[POLICY_BUF_POLICY_OFFSET+1] = (uint8_t)((delete_policy & 0x00FF0000) >> (8 * 2));
-    policy_buf[POLICY_BUF_POLICY_OFFSET+2] = (uint8_t)((delete_policy & 0x0000FF00) >> (8 * 1));
-    policy_buf[POLICY_BUF_POLICY_OFFSET+3] = (uint8_t)((delete_policy & 0x000000FF) >> (8 * 0));
-    policy_for_auth_obj.value = policy_buf;
-    policy_for_auth_obj.value_len = POLICY_BUF_LEN;
+    uint32_t delete_policy                   = POLICY_OBJ_ALLOW_DELETE;
+    uint8_t policy_buf[POLICY_BUF_LEN]       = {0};
+    Se05xPolicy_t policy_for_auth_obj        = {0};
+    policy_buf[0]                            = POLICY_BUF_POLICY_LEN;
+    policy_buf[POLICY_BUF_POLICY_OFFSET]     = (uint8_t)((delete_policy & 0xFF000000) >> (8 * 3));
+    policy_buf[POLICY_BUF_POLICY_OFFSET + 1] = (uint8_t)((delete_policy & 0x00FF0000) >> (8 * 2));
+    policy_buf[POLICY_BUF_POLICY_OFFSET + 2] = (uint8_t)((delete_policy & 0x0000FF00) >> (8 * 1));
+    policy_buf[POLICY_BUF_POLICY_OFFSET + 3] = (uint8_t)((delete_policy & 0x000000FF) >> (8 * 0));
+    policy_for_auth_obj.value                = policy_buf;
+    policy_for_auth_obj.value_len            = POLICY_BUF_LEN;
 
     ex_set_scp03_keys(&se05x_session);
 
@@ -260,17 +279,17 @@ int se05x_eckey_session_provision(void)
     SMLOG_I("To Open EC Key session, pass the same key pair to session context (session_ctx->pEc_auth_key) \n");
 
     status = Se05x_API_ReadECCurveList(&se05x_session, curveList, &curveListLen);
-    if(status != SM_OK) {
+    if (status != SM_OK) {
         SMLOG_E("Error in Se05x_API_ReadECCurveList \n");
         return 1;
     }
     else {
         if (curveList[curveID - 1] == kSE05x_SetIndicator_SET) {
-           SMLOG_I("curveID = %0x already exists \n ", curveID);
+            SMLOG_I("curveID = %0x already exists \n ", curveID);
         }
         else {
             status = ex_se05x_create_curve(curveID);
-            if(status != SM_OK) {
+            if (status != SM_OK) {
                 SMLOG_I("Error in ex_se05x_create_curve \n");
                 return 1;
             }

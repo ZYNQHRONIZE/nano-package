@@ -222,7 +222,7 @@ void *hcrypto_gen_eckey(uint16_t keylen)
 {
     int ret = 0;
 
-    if (keylen != 32){
+    if (keylen != 32) {
         /* Only nist256 is supported in TC wrapper */
         return NULL;
     }

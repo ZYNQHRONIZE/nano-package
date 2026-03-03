@@ -73,6 +73,6 @@ uint8_t qi_rootca_cert[] = {
 };
 
 /* clang-format on */
-#endif//USE_ROOT_WPCCA
+#endif //USE_ROOT_WPCCA
 
 size_t qi_rootca_cert_len = sizeof(qi_rootca_cert);

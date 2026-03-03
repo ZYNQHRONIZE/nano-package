@@ -397,7 +397,9 @@ smStatus_t Se05x_API_ECKey_CreateSession(pSe05xSession_t session_ctx)
     ENSURE_OR_GO_EXIT(status == SM_OK);
 
     if (exists == kSE05x_Result_FAILURE) {
-        SMLOG_E("ECKEY_AUTH_OBJECT_ID is not Provisioned!!!. (Key can be provisioned using the example se05x_eckey_session_provision) \n");
+        SMLOG_E(
+            "ECKEY_AUTH_OBJECT_ID is not Provisioned!!!. (Key can be provisioned using the example "
+            "se05x_eckey_session_provision) \n");
         status = SM_NOT_OK;
         goto exit;
     }
@@ -424,8 +426,7 @@ smStatus_t Se05x_API_ECKey_CreateSession(pSe05xSession_t session_ctx)
     memcpy(SePubkey, header, header_size);
 
     SePubkeyLen = SePubkeyLen - header_size;
-    status = Se05x_API_ReadObject(
-        session_ctx, RESERVED_ID_ECKEY_SESSION, 0, 0, SePubkey + header_size, &SePubkeyLen);
+    status = Se05x_API_ReadObject(session_ctx, RESERVED_ID_ECKEY_SESSION, 0, 0, SePubkey + header_size, &SePubkeyLen);
     ENSURE_OR_GO_EXIT(status == SM_OK);
 
     ENSURE_OR_GO_EXIT((SIZE_MAX - (header_size)) > SePubkeyLen);
@@ -454,8 +455,7 @@ smStatus_t Se05x_API_ECKey_CreateSession(pSe05xSession_t session_ctx)
     ENSURE_OR_GO_EXIT((hostEckaPubLen - header_size) < UINT8_MAX);
     hostEckaPub[offset++] = hostEckaPubLen - header_size; // public key len
 
-    memcpy(
-        hostEckaPub + offset, hostPubkey + header_size, hostEckaPubLen - header_size);
+    memcpy(hostEckaPub + offset, hostPubkey + header_size, hostEckaPubLen - header_size);
     ENSURE_OR_GO_EXIT(((UINT_MAX - offset) > (hostEckaPubLen - header_size)));
     offset += hostEckaPubLen - header_size;
 
@@ -464,7 +464,7 @@ smStatus_t Se05x_API_ECKey_CreateSession(pSe05xSession_t session_ctx)
     hostEckaPub[offset++] = KEY_PARAMETER_CURVE_IDENTIFIER_VALUE_LEN;
     hostEckaPub[offset++] =
         (key_len == 32) ? KEY_PARAMETER_CURVE_IDENTIFIER_VALUE_NIST256 : KEY_PARAMETER_CURVE_IDENTIFIER_VALUE_NIST384;
-    hostEckaPubLen     = offset;
+    hostEckaPubLen = offset;
 
     status =
         nxECKey_InternalAuthenticate(session_ctx, hostEckaPub, hostEckaPubLen, drSE, &drSELen, receipt, &receiptLen);

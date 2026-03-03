@@ -52,7 +52,7 @@ static void systick_delay(const uint32_t delayTicks)
 
     __disable_irq();
 
-    if ((gtimer_kinetis_msticks)&0x80000000u) {
+    if ((gtimer_kinetis_msticks) & 0x80000000u) {
         /* gtimer_kinetis_msticks has increased drastically (MSB is set),
          * So, reset gtimer_kinetis_msticks before it's too late to detect an
          * overflow. */

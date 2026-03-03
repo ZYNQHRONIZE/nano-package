@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2014,2018-2020,2022,2024 NXP
+ * Copyright 2012-2014,2018-2020,2022,2024,2026 NXP
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -386,9 +386,8 @@ void phNxpEse_waitForWTX(void *conn_ctx)
         if (ret < 0) {
             T_SMLOG_E(" %s - Error in phPalEse_i2c_read ", __FUNCTION__);
         }
-        else
-        {
-            T_SMLOG_MAU8_D("Previous RAW Rx < ",nxpese_ctxt->p_read_buff,ret );
+        else {
+            T_SMLOG_MAU8_D("Previous RAW Rx < ", nxpese_ctxt->p_read_buff, ret);
             //if (readBuf[0] == RECIEVE_PACKET_SOF && readBuf[1] == WTX_REQ_ID)
             if (nxpese_ctxt->p_read_buff[0] == RECIEVE_PACKET_SOF && nxpese_ctxt->p_read_buff[1] == WTX_REQ_ID) {
                 /** 0xC3 corresponds to WTX request. Send WTX response. */
@@ -510,12 +509,12 @@ static int phNxpEse_readPacket(void *conn_ctx, void *pDevHandle, uint8_t *pBuffe
     do {
         sof_counter++;
         ret = -1;
-        sm_sleep(ESE_POLL_DELAY_MS);                     /* 1ms delay to give ESE polling delay */
         ret = phPalEse_i2c_read(pDevHandle, pBuffer, 2); /*read NAD PCB byte first*/
         if (ret < 0) {
             /*Polling for read on i2c, hence Debug log*/
             T_SMLOG_D("_i2c_read() ret : %X", ret);
         }
+
         if (pBuffer[0] == RECIEVE_PACKET_SOF) {
             /* Read the HEADR of Two bytes*/
             T_SMLOG_D("%s Read HDR", __FUNCTION__);
@@ -528,6 +527,7 @@ static int phNxpEse_readPacket(void *conn_ctx, void *pDevHandle, uint8_t *pBuffe
             headerIndex = 1;
             break;
         }
+
         if (pBuffer[1] == RECIEVE_PACKET_SOF) {
             /* Read the HEADR of Two bytes*/
             T_SMLOG_D("%s Read HDR", __FUNCTION__);
@@ -540,6 +540,7 @@ static int phNxpEse_readPacket(void *conn_ctx, void *pDevHandle, uint8_t *pBuffe
             headerIndex = 0;
             break;
         }
+
         /*if host writes invalid frame and host and SE are out of sync*/
         if ((pBuffer[0] == 0x00) && ((pBuffer[1] == 0x82) || (pBuffer[1] == 0x92))) {
             T_SMLOG_W("%s Recieved NAD byte 0x%x ", __FUNCTION__, pBuffer[0]);
@@ -571,16 +572,16 @@ static int phNxpEse_readPacket(void *conn_ctx, void *pDevHandle, uint8_t *pBuffe
             }
             break;
         }
+
         /*If it is Chained packet wait for 1 ms*/
         if (poll_sof_chained_delay == 1) {
             T_SMLOG_D("%s Chained Pkt, delay read %dms", __FUNCTION__, ESE_POLL_DELAY_MS * CHAINED_PKT_SCALER);
-            sm_sleep(ESE_POLL_DELAY_MS);
         }
         else {
             T_SMLOG_D("%s Normal Pkt, delay read %dms", __FUNCTION__, ESE_POLL_DELAY_MS * NAD_POLLING_SCALER);
-            sm_sleep(ESE_POLL_DELAY_MS);
         }
     } while ((sof_counter < ESE_NAD_POLLING_MAX) && (nxpese_ctxt->EseLibStatus != ESE_STATUS_CLOSE));
+
     if ((pBuffer[0] == RECIEVE_PACKET_SOF) && (ret > 0)) {
         T_SMLOG_D("%s SOF FOUND", __FUNCTION__);
         /* Read the HEADR of one/Two bytes based on how two bytes read A5 PCB or 00 A5*/

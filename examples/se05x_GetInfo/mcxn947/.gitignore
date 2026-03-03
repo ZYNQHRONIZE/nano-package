@@ -1,6 +1,8 @@
 /Debug/
 /Release/
 .settings
-MCXN947_se05x_GetInfo  LinkServer Debug.launch
-MCXN947_se05x_GetInfo  LinkServer Release.launch
+MCXN947_se05x_GetInfo LinkServer Debug.launch
+MCXN947_se05x_GetInfo LinkServer Release.launch
+MCXN947_se05x_GetInfo JLink Debug.launch
+MCXN947_se05x_GetInfo JLink Release.launch
 script.jlink

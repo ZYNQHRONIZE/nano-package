@@ -1,7 +1,7 @@
 .. _ex_se05x_sign_mcxn947:
 
-SE05x Sign Example - mcxn947
-=============================
+SE05x ReadIDList Example - mcxn947
+==================================
 
 **Prequisite**
 
@@ -18,7 +18,7 @@ SE05x Sign Example - mcxn947
 
 1. Click on File, Import, Existing project to workspace and click on next.
 
-2. Point to the "simw-nanopkg/examples/se05x_sign/mcxn947" folder
+2. Point to the "simw-nanopkg/examples/se05x_ReadIDList/mcxn947" folder
 
 3. Select the Project and click on Finish
 
@@ -64,7 +64,6 @@ To build without Platform SCP or EC Key authentication, simply remove the respec
 
 The example can be built with either Mbed TLS 2.x or 3.x. By default the example is configured to be built with Mbed TLS 3.x.
 To build with Mbed TLS 2.x, Refer doc\mbedtls_2x_steps.rst.
-
 
 **Build and Debug**
 

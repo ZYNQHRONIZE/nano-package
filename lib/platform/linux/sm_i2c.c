@@ -1,7 +1,7 @@
 /** @file sm_i2c.c
  *  @brief I2C Interface functions.
  *
- * Copyright 2021,2022 NXP
+ * Copyright 2021,2022,2026 NXP
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -64,7 +64,7 @@ i2c_error_t axI2CInit(void **conn_ctx, const char *pDevName)
     }
     else {
         if (funcs & I2C_FUNC_I2C) {
-            SMLOG_E("I2C driver supports plain i2c-level commands.\n");
+            SMLOG_D("I2C driver supports plain i2c-level commands.\n");
         }
         else {
             SMLOG_E("I2C driver CANNOT support plain i2c-level commands!\n");

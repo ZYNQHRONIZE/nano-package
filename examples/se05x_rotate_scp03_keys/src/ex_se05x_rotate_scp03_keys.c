@@ -16,7 +16,7 @@
 #elif EX_SE05X_USE_TC
 #include <tinycrypt/aes.h>
 #include <tinycrypt/constants.h>
-#elif EX_SE05X_USE_MBEDTLS
+#elif EX_SE05X_USE_MBEDTLS2X || EX_SE05X_USE_MBEDTLS3X
 #include <mbedtls/ctr_drbg.h>
 #include <mbedtls/cmac.h>
 #include <mbedtls/aes.h>
@@ -117,7 +117,7 @@ static int ex_aes_ecb_encrypt(uint8_t *key, size_t keylen, const uint8_t *srcDat
 {
 #if EX_SE05X_USE_OPENSSL
     AES_KEY AESKey;
-#elif EX_SE05X_USE_MBEDTLS
+#elif EX_SE05X_USE_MBEDTLS2X || EX_SE05X_USE_MBEDTLS3X
     mbedtls_aes_context aes_ctx;
 #elif EX_SE05X_USE_TC
     struct tc_aes_key_sched_struct aes_ecb_sched;
@@ -135,14 +135,14 @@ static int ex_aes_ecb_encrypt(uint8_t *key, size_t keylen, const uint8_t *srcDat
         return 1;
     }
     AES_ecb_encrypt(srcData, destData, &AESKey, AES_ENCRYPT);
-#elif EX_SE05X_USE_MBEDTLS
+#elif EX_SE05X_USE_MBEDTLS2X || EX_SE05X_USE_MBEDTLS3X
     mbedtls_aes_init(&aes_ctx);
-	if (mbedtls_aes_setkey_enc(&aes_ctx, key, (unsigned int)(keylen * 8))  != 0) {
-		return 1;
-	}
-	if (mbedtls_aes_crypt_ecb(&aes_ctx, MBEDTLS_AES_ENCRYPT, srcData, destData)  != 0) {
-		return 1;
-	}
+    if (mbedtls_aes_setkey_enc(&aes_ctx, key, (unsigned int)(keylen * 8)) != 0) {
+        return 1;
+    }
+    if (mbedtls_aes_crypt_ecb(&aes_ctx, MBEDTLS_AES_ENCRYPT, srcData, destData) != 0) {
+        return 1;
+    }
 #elif EX_SE05X_USE_TC
     if (TC_CRYPTO_SUCCESS != tc_aes128_set_encrypt_key(&aes_ecb_sched, key)) {
         return 1;

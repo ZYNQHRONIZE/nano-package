@@ -15,8 +15,11 @@
 #include "pin_mux.h"
 #include "sm_timer.h"
 
-#if (EX_SE05X_USE_MBEDTLS)
+#if (EX_SE05X_USE_MBEDTLS2X)
 #include "els_pkc_mbedtls.h"
+#endif
+#if (EX_SE05X_USE_MBEDTLS3X)
+#include "mcux_mbedtls_config.h"
 #endif
 
 extern void axReset_HostConfigure(void);
@@ -52,7 +55,7 @@ void platformInit()
     axReset_HostConfigure();
     axReset_PowerUp();
 
-#if (EX_SE05X_USE_MBEDTLS)
+#if (EX_SE05X_USE_MBEDTLS2X)
     CRYPTO_InitHardware();
 #if defined(FSL_FEATURE_SOC_SHA_COUNT) && (FSL_FEATURE_SOC_SHA_COUNT > 0)
     CLOCK_EnableClock(kCLOCK_Sha0);

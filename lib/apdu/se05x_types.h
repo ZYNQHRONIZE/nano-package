@@ -1,7 +1,7 @@
 /** @file se05x_types.h
  *  @brief .
  *
- * Copyright 2021,2022,2024 NXP
+ * Copyright 2021,2022,2024,2026 NXP
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -18,8 +18,8 @@
 
 /** Plug and Trust Nano package version */
 #define VERSION_MAJOR 1
-#define VERSION_MINOR 5
-#define VERSION_DEV 4
+#define VERSION_MINOR 6
+#define VERSION_DEV 0
 
 /**
 * APDU buffer size.
@@ -213,6 +213,7 @@ typedef enum
     kSE05x_P2_EXIST           = 0x27,
     kSE05x_P2_DELETE_OBJECT   = 0x28,
     kSE05x_P2_SESSION_UserID  = 0x2C,
+    kSE05x_P2_PBKDF           = 0x2E,
     kSE05x_P2_DH              = 0x0F,
     kSE05x_P2_ENCRYPT_ONESHOT = 0x37,
     kSE05x_P2_DECRYPT_ONESHOT = 0x38,
@@ -511,5 +512,18 @@ typedef enum
     kSE05x_AttestationAlgo_EC_SHA_512          = kSE05x_ECSignatureAlgo_SHA_512,
     kSE05x_AttestationAlgo_ED25519PURE_SHA_512 = kSE05x_EDSignatureAlgo_ED25519PURE_SHA_512,
 } SE05x_AttestationAlgo_t;
+
+/** HMAC/CMAC Algorithms  */
+typedef enum
+{
+    /** Invalid */
+    kSE05x_MACAlgo_NA          = 0,
+    kSE05x_MACAlgo_HMAC_SHA1   = 0x18,
+    kSE05x_MACAlgo_HMAC_SHA256 = 0x19,
+    kSE05x_MACAlgo_HMAC_SHA384 = 0x1A,
+    kSE05x_MACAlgo_HMAC_SHA512 = 0x1B,
+    kSE05x_MACAlgo_CMAC_128    = 0x31,
+    kSE05x_MACAlgo_DES_CMAC8   = 0x7A,
+} SE05x_MACAlgo_t;
 
 #endif //#ifndef SE05X_TYPES_H_INC

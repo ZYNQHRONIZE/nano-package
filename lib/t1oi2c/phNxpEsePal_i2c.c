@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014,2018-2020,2022 NXP
+ * Copyright 2010-2014,2018-2020,2022,2026 NXP
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,6 @@
  * limitations under the License.
  */
 
-/*
- * DAL i2c port implementation for linux
- *
- * Project: Trusted ESE Linux
- *
- */
 #include <phNxpEsePal_i2c.h>
 #include <phEseStatus.h>
 #include "sm_i2c.h"
@@ -27,6 +21,71 @@
 #include "sm_port.h"
 
 #define MAX_RETRY_CNT 10
+
+static int gBackoffDelay = 0;
+
+/*******************************************************************************
+**
+** Function         phPalEse_i2c_back_off_delay_reset
+**
+** Description      Back off delay is reset to 0
+**
+** param[in]        None
+**
+** Returns          None
+**
+*******************************************************************************/
+static void phPalEse_i2c_back_off_delay_reset()
+{
+    T_SMLOG_D("phPalEse_i2c_back_off_delay_reset");
+    gBackoffDelay = 0;
+}
+
+/*******************************************************************************
+**
+** Function         phPalEse_i2c_back_off_delay_wait
+**
+** Description      Delay is incremented by 1 for every call
+**
+** param[in]        None
+**
+** Returns          None
+**
+*******************************************************************************/
+static void phPalEse_i2c_back_off_delay_wait()
+{
+    if (gBackoffDelay < 200) {
+        gBackoffDelay += 1;
+    }
+    T_SMLOG_D("phPalEse_i2c_back_off_delay_wait: %d", gBackoffDelay);
+    sm_sleep(gBackoffDelay);
+}
+
+/*******************************************************************************
+**
+** Function         phPalEse_i2c_is_retryable_error
+**
+** Description      Check if the I2C error is retryable based on platform
+**
+** param[in]        ret - I2C error code
+**
+** Returns          1 if error is retryable, 0 otherwise
+**
+*******************************************************************************/
+static int phPalEse_i2c_is_retryable_error(unsigned int ret)
+{
+    /* if platform returns different error codes, modify the check below.*/
+#ifdef T1OI2C_RETRY_ON_I2C_FAILED
+    if ((ret == I2C_FAILED) || (ret == I2C_NACK_ON_ADDRESS) || (ret == I2C_NACK_ON_DATA)) {
+        return 1;
+    }
+#else
+    if ((ret == I2C_NACK_ON_ADDRESS) || (ret == I2C_NACK_ON_DATA)) {
+        return 1;
+    }
+#endif
+    return 0;
+}
 
 /*******************************************************************************
 **
@@ -71,10 +130,14 @@ ESESTATUS phPalEse_i2c_open_and_configure(pphPalEse_Config_t pConfig)
     int retryCnt         = 0;
     unsigned int i2c_ret = 0;
 
+    // Initializing Global variable gBackoffDelay
+    phPalEse_i2c_back_off_delay_reset();
+
     T_SMLOG_D("%s Opening port", __FUNCTION__);
-    /* open port */
+
     /*Disable as interface reset happens on every session open*/
     //se05x_ic_reset();
+
 retry:
     i2c_ret = axI2CInit(&conn_ctx, (const char *)pConfig->pDevName);
     if (i2c_ret != I2C_OK) {
@@ -115,37 +178,32 @@ int phPalEse_i2c_read(void *pDevHandle, uint8_t *pBuffer, int nNbBytesToRead)
     unsigned int ret = 0;
     int retryCount   = 0;
     int numRead      = 0;
+
     T_SMLOG_D("%s Read Requested %d bytes ", __FUNCTION__, nNbBytesToRead);
-    //sm_sleep(ESE_POLL_DELAY_MS);
     while (numRead != nNbBytesToRead) {
         ret = axI2CRead(pDevHandle, I2C_BUS_0, SMCOM_I2C_ADDRESS, pBuffer, nNbBytesToRead);
         if (ret != I2C_OK) {
             T_SMLOG_D("_i2c_read() error : %d ", ret);
-            /* if platform returns different error codes, modify the check below.*/
-            /* Also adjust the retry count based on the platform */
-#ifdef T1OI2C_RETRY_ON_I2C_FAILED
-            if (((ret == I2C_FAILED) || (ret == I2C_NACK_ON_ADDRESS)) && (retryCount < MAX_RETRY_COUNT)) {
-#else
-            if ((ret == I2C_NACK_ON_ADDRESS) && (retryCount < MAX_RETRY_COUNT)) {
-#endif
-                retryCount++;
-                /* 1ms delay to give ESE polling delay */
-                /*i2c driver back off delay is providing 1ms wait time so ignoring waiting time at this level*/
-#ifdef T1OI2C_RETRY_ON_I2C_FAILED
-                sm_sleep(ESE_POLL_DELAY_MS);
-#endif
-                T_SMLOG_D("_i2c_read() failed. Going to retry, counter:%d  !", retryCount);
-                continue;
+            if (phPalEse_i2c_is_retryable_error(ret)) {
+                 /* Back-off delay wait with 1ms */
+                phPalEse_i2c_back_off_delay_wait();
+                if(retryCount < MAX_RETRY_COUNT) {
+                    retryCount++;
+                    T_SMLOG_D("_i2c_read() failed. Going to retry, counter:%d  !", retryCount);
+                    continue;
+                }
             }
             return -1;
         }
         else {
+            phPalEse_i2c_back_off_delay_reset();
             numRead = nNbBytesToRead;
             break;
         }
     }
     return numRead;
 }
+
 
 /*******************************************************************************
 **
@@ -163,30 +221,31 @@ int phPalEse_i2c_read(void *pDevHandle, uint8_t *pBuffer, int nNbBytesToRead)
 *******************************************************************************/
 int phPalEse_i2c_write(void *pDevHandle, uint8_t *pBuffer, int nNbBytesToWrite)
 {
-    unsigned int ret = I2C_OK, retryCount = 0;
-    int numWrote = 0;
-    pBuffer[0]   = 0x5A; //Recovery if stack forgot to add NAD byte.
+    unsigned int ret = I2C_OK;
+    int retryCount   = 0;
+    int numWrote     = 0;
+
+    pBuffer[0] = 0x5A; //Recovery if stack forgot to add NAD byte.
+
     do {
-        /* 1ms delay to give ESE polling delay */
-        sm_sleep(ESE_POLL_DELAY_MS);
         ret = axI2CWrite(pDevHandle, I2C_BUS_0, SMCOM_I2C_ADDRESS, pBuffer, nNbBytesToWrite);
         if (ret != I2C_OK) {
             T_SMLOG_D("_i2c_write() error : %d ", ret);
-            if ((ret == I2C_NACK_ON_ADDRESS) && (retryCount < MAX_RETRY_COUNT)) {
+            if (phPalEse_i2c_is_retryable_error(ret) && (retryCount < MAX_RETRY_COUNT)) {
+                 /* Back-off delay wait with 1ms */
+                phPalEse_i2c_back_off_delay_wait();
                 retryCount++;
-                /* 1ms delay to give ESE polling delay */
-                /*i2c driver back off delay is providing 1ms wait time so ignoring waiting time at this level*/
-                //sm_sleep(ESE_POLL_DELAY_MS);
                 T_SMLOG_D("_i2c_write() failed. Going to retry, counter:%d  !", retryCount);
                 continue;
             }
             return -1;
         }
         else {
+            phPalEse_i2c_back_off_delay_reset();
             numWrote = nNbBytesToWrite;
-            //sm_sleep(ESE_POLL_DELAY_MS);
             break;
         }
     } while (ret != I2C_OK);
+
     return numWrote;
 }

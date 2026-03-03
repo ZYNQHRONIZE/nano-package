@@ -256,34 +256,14 @@
 			<locationURI>PARENT-4-PROJECT_LOC/mcxa153-sdk/devices/MCXA153/mcuxpresso/startup_mcxa153.c</locationURI>
 		</link>
 		<link>
-			<name>source/utilities/fsl_assert.c</name>
-			<type>1</type>
-			<locationURI>PARENT-4-PROJECT_LOC/mcxa153-sdk/devices/MCXA153/utilities/fsl_assert.c</locationURI>
+			<name>source/utilities/debug_console_lite</name>
+			<type>2</type>
+			<locationURI>PARENT-4-PROJECT_LOC/mcxa153-sdk/devices/MCXA153/utilities/debug_console_lite</locationURI>
 		</link>
 		<link>
-			<name>source/utilities/fsl_debug_console.c</name>
-			<type>1</type>
-			<locationURI>PARENT-4-PROJECT_LOC/mcxa153-sdk/devices/MCXA153/utilities/debug_console/fsl_debug_console.c</locationURI>
-		</link>
-		<link>
-			<name>source/utilities/fsl_debug_console.h</name>
-			<type>1</type>
-			<locationURI>PARENT-4-PROJECT_LOC/mcxa153-sdk/devices/MCXA153/utilities/debug_console/fsl_debug_console.h</locationURI>
-		</link>
-		<link>
-			<name>source/utilities/fsl_debug_console_conf.h</name>
-			<type>1</type>
-			<locationURI>PARENT-4-PROJECT_LOC/mcxa153-sdk/devices/MCXA153/utilities/debug_console/fsl_debug_console_conf.h</locationURI>
-		</link>
-		<link>
-			<name>source/utilities/fsl_str.c</name>
-			<type>1</type>
-			<locationURI>PARENT-4-PROJECT_LOC/mcxa153-sdk/devices/MCXA153/utilities/str/fsl_str.c</locationURI>
-		</link>
-		<link>
-			<name>source/utilities/fsl_str.h</name>
-			<type>1</type>
-			<locationURI>PARENT-4-PROJECT_LOC/mcxa153-sdk/devices/MCXA153/utilities/str/fsl_str.h</locationURI>
+			<name>source/utilities/str</name>
+			<type>2</type>
+			<locationURI>PARENT-4-PROJECT_LOC/mcxa153-sdk/devices/MCXA153/utilities/str</locationURI>
 		</link>
 		<link>
 			<name>source/component/lists/fsl_component_generic_list.c</name>

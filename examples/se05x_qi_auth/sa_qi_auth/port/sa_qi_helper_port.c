@@ -177,7 +177,7 @@ static void parseCertGetTBS(uint8_t *pCert, size_t certLen, uint8_t *pgetTbs, si
         if ((*p & 0x7F) == 0x01) {
             length = *(p + 1) + 3;
         }
-        else if ((*(p)&0x7F) == 0x02) {
+        else if ((*(p) & 0x7F) == 0x02) {
             length = ((*(p + 1) << 8) + *(p + 2)) + 4;
         }
     }

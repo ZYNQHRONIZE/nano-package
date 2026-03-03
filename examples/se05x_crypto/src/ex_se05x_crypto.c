@@ -1,7 +1,7 @@
 /** @file ex_se05x_crypto.c
  *  @brief se05x crypto example
  *
- * Copyright 2021,2022,2024 NXP
+ * Copyright 2021,2022,2024,2026 NXP
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -28,6 +28,7 @@
 #define CERT_SIZE 1024
 #define SET_CERT_BLK_SIZE 128
 #define ATTESTATION_KEY_ID 0xF0000012
+#define PBKDF_OBJ_ID 0x7D51F000u + 1
 
 /* ********************** Global variables ********************** */
 
@@ -917,7 +918,6 @@ int ex_read_attst_object(pSe05xSession_t session_ctx)
     smStatus_t status;
     SE05x_Result_t result;
     uint32_t keyID          = TEST_ID_BASE + __LINE__;
-    uint32_t pub_keyID      = TEST_ID_BASE + __LINE__;
     SE05x_ECCurve_t curveID = kSE05x_ECCurve_NIST_P256;
     uint8_t random[16]      = {
         0,
@@ -996,6 +996,7 @@ int ex_read_attst_object(pSe05xSession_t session_ctx)
         size_t rspIndex          = 0;
         uint8_t outRandom[32]    = {0};
         size_t outRandomLen      = sizeof(outRandom);
+        uint32_t pub_keyID       = TEST_ID_BASE + __LINE__;
 
         tlvRet  = tlvGet_u8buf(rspBuf, &rspIndex, rspbufLen, kSE05x_TAG_1, data, &dataLen); /*  */
         if (0 != tlvRet) {
@@ -1256,6 +1257,74 @@ exit:
     EX_FAIL;
 }
 
+int ex_password_based_kdf2(pSe05xSession_t session_ctx)
+{
+    smStatus_t status              = SM_NOT_OK;
+    SE05x_Result_t result          = kSE05x_Result_NA;
+    const uint8_t password[]       = "passwordPASSWORDpassword";
+    uint32_t password_len          = sizeof(password) - 1;
+    uint8_t policy_buf[]           = {0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x34, 0x00, 0x80};
+    size_t policy_buf_len          = sizeof(policy_buf);
+    Se05xPolicy_t policy           = {0};
+    uint8_t salt[]                 = "saltSALTsaltSALTsaltSALTsaltSALTsalt";
+    size_t salt_len                = sizeof(salt) - 1;
+    uint8_t pbkdf_derived_key[256] = {0};
+    size_t pbkdf_derived_key_len   = sizeof(pbkdf_derived_key);
+    size_t requested_len           = 25;
+
+    status = Se05x_API_CheckObjectExists(session_ctx, PBKDF_OBJ_ID, &result);
+    if (status != SM_OK) {
+        SMLOG_E("Error in Se05x_API_CheckObjectExists \n");
+        goto exit;
+    }
+
+    if (status == SM_OK && result == kSE05x_Result_SUCCESS) {
+        status = Se05x_API_DeleteSecureObject(session_ctx, PBKDF_OBJ_ID);
+        if (status != SM_OK) {
+            SMLOG_W("Could not delete object at PBKDF_OBJ_ID 0x%08X", PBKDF_OBJ_ID);
+        }
+    }
+
+    SMLOG_I("Injecting PBKDF password = \"%s\"", password);
+    // Create HMAC Object
+    policy.value     = (uint8_t *)policy_buf;
+    policy.value_len = policy_buf_len;
+    status           = Se05x_API_WriteSymmKey(session_ctx,
+        &policy,
+        0,
+        PBKDF_OBJ_ID,
+        SE05x_KeyID_KEK_NONE,
+        password,
+        password_len,
+        kSE05x_INS_NA,
+        kSE05x_SymmKeyType_HMAC);
+    if (status != SM_OK) {
+        // Assume HMAC object is already present
+        SMLOG_W(
+            "Could not create HMAC object at PBKDF_OBJ_ID 0x%08X. Assuming object is already present.", PBKDF_OBJ_ID);
+    }
+
+    status = Se05x_API_PBKDF2_extended(session_ctx,
+        PBKDF_OBJ_ID,
+        salt,
+        salt_len,
+        0,
+        4096,
+        kSE05x_MACAlgo_HMAC_SHA256,
+        requested_len,
+        0,
+        pbkdf_derived_key,
+        &pbkdf_derived_key_len);
+    if (status != SM_OK) {
+        SMLOG_E("Se05x_API_PBKDF2_extended Failed");
+        goto exit;
+    }
+
+    EX_PASS;
+exit:
+    EX_FAIL;
+}
+
 void ex_set_scp03_keys(pSe05xSession_t session_ctx)
 {
     session_ctx->pScp03_enc_key    = &scp03_enc_key[0];
@@ -1305,6 +1374,7 @@ int ex_se05x_crypto()
     ex_aes_CTR(&se05x_session);
     ex_nist256_sign_policy(&se05x_session);
     ex_read_attst_object(&se05x_session);
+    ex_password_based_kdf2(&se05x_session);
 
     status = Se05x_API_SessionClose(&se05x_session);
     if (status != SM_OK) {

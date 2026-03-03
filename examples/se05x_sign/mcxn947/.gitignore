@@ -4,3 +4,5 @@
 MCXN947_se05x_sign LinkServer Debug.launch
 MCXN947_se05x_sign LinkServer Release.launch
 script.jlink
+MCXN947_se05x_sign JLink Debug*.launch
+MCXN947_se05x_sign JLink Release*.launch

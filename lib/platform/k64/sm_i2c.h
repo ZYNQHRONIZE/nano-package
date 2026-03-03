@@ -1,7 +1,7 @@
 /** @file sm_i2c.h
  *  @brief I2C Interface functions.
  *
- * Copyright 2017-2020,2022 NXP
+ * Copyright 2017-2020,2022,2026 NXP
  * SPDX-License-Identifier: Apache-2.0
  */
 

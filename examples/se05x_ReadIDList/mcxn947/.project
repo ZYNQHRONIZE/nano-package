@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>MCXN947_se05x_eckey_session_provision</name>
+	<name>MCXN947_se05x_ReadIDList</name>
 	<comment></comment>
 	<projects>
 	</projects>
 	<buildSpec>
 		<buildCommand>
 			<name>org.eclipse.cdt.managedbuilder.core.genmakebuilder</name>
-			<triggers>full,incremental,</triggers>
+			<triggers>clean,full,incremental,</triggers>
 			<arguments>
 			</arguments>
 		</buildCommand>
 		<buildCommand>
 			<name>org.eclipse.cdt.managedbuilder.core.ScannerConfigBuilder</name>
-			<triggers>incremental,</triggers>
+			<triggers>full,incremental,</triggers>
 			<arguments>
 			</arguments>
 		</buildCommand>
@@ -76,6 +76,11 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
+			<name>source/ex_se05x_ReadIDList.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/src/ex_se05x_ReadIDList.c</locationURI>
+		</link>
+		<link>
 			<name>source/lib</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
@@ -84,11 +89,6 @@
 			<name>source/middleware</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
-			<name>source/se05x_eckey_session_provision.c</name>
-			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/src/se05x_eckey_session_provision.c</locationURI>
 		</link>
 		<link>
 			<name>source/startup</name>
@@ -2304,6 +2304,11 @@
 			<name>source/middleware/mbedtls3x/library/poly1305.c</name>
 			<type>1</type>
 			<locationURI>PARENT-4-PROJECT_LOC/mcxn947-sdk/middleware/mbedtls3x/library/poly1305.c</locationURI>
+		</link>
+		<link>
+			<name>source/middleware/mbedtls3x/library/psa_crypto.c</name>
+			<type>1</type>
+			<locationURI>PARENT-4-PROJECT_LOC/mcxn947-sdk/middleware/mbedtls3x/library/psa_crypto.c</locationURI>
 		</link>
 		<link>
 			<name>source/middleware/mbedtls3x/library/psa_crypto_aead.c</name>

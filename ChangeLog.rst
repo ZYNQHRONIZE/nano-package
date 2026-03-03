@@ -6,6 +6,15 @@ ChangeLog
 ChangeLog
 ---------
 
+**Pre-Release (v1.6.0)**
+
+- Back off delay logic implemented in T=1oI2C layer now. Back off delay implementation is removed from all platform specific folders.
+
+- PBKDF2 APDU (for IoT applet >= 7.2) added. Crypto example extended with PBKDF2 example.
+
+- All examples are updated to use MCU-SDK version 25.6.00 for mcx-n and 25.06.00 for mcx-a.
+
+
 **Release v1.5.4**
 
 - se05x_eckey_session_provision example extended for mcx-n

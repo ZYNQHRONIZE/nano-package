@@ -1,0 +1,6 @@
+/Debug/
+/Release/
+.settings
+MCXN947_se05x_ReadIDList  LinkServer Debug.launch
+MCXN947_se05x_ReadIDList  LinkServer Release.launch
+script.jlink

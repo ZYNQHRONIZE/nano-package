@@ -150,7 +150,7 @@ int ex_se05x_GetInfo()
 
     status = Se05x_API_SessionClose(p_session_ctx);
     if (status != SM_OK) {
-        SMLOG_I("Error in Se05x_API_SessionClose \n");
+        SMLOG_W("Error in Se05x_API_SessionClose \n");
         return 1;
     }
 

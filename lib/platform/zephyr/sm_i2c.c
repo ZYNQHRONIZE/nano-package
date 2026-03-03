@@ -1,7 +1,7 @@
 /** @file sm_i2c.c
  *  @brief I2C Interface functions.
  *
- * Copyright 2021,2022,2024 NXP
+ * Copyright 2021,2022,2024,2026 NXP
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -14,7 +14,7 @@
 #include "sm_port.h"
 
 /* ********************** Defines ********************** */
-#define I2C_DEV_NODE    DT_ALIAS(se05x_i2c)
+#define I2C_DEV_NODE DT_ALIAS(se05x_i2c)
 #define SE05X_I2C_DEV_ADDR 0x48
 
 /* ********************** Global variables ********************** */

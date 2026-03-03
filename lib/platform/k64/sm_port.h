@@ -1,7 +1,7 @@
 /** @file sm_port.h
  *  @brief Platform specific content.
  *
- * Copyright 2021,2022 NXP
+ * Copyright 2021,2022,2026 NXP
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -41,6 +41,7 @@
 #define SMLOG_D(...)     \
     printf(COLOR_GREEN); \
     printf(__VA_ARGS__); \
+    printf("\r\n");      \
     printf(COLOR_RESET)
 #define SMLOG_AU8_D(BUF, LEN)                               \
     printf(COLOR_GREEN);                                    \

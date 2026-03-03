@@ -148,7 +148,7 @@ smStatus_t getSha256Hash(
     }
 
 exit:
-    if(SM_OK != Se05x_API_DeleteCryptoObject(session_ctx, kSE05x_CryptoObject_DIGEST_SHA256)){
+    if (SM_OK != Se05x_API_DeleteCryptoObject(session_ctx, kSE05x_CryptoObject_DIGEST_SHA256)) {
         LOG_E("Se05x_API_DeleteCryptoObject failed");
     }
 

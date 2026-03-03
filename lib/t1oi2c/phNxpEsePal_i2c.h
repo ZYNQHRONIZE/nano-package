@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014,2018-2020,2022 NXP
+ * Copyright 2010-2014,2018-2020,2022,2026 NXP
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,18 +31,15 @@
 
 /*!
  * \brief ESE Poll timeout.
- * As Max WTX timeout is 1sec, select ESE_NAD_POLLING_MAX count in such a way that WTX request frm SE is not skiped.
- * select target value is 2 sec.
- *
- * Note: Here ESE_NAD_POLLING_MAX is depend on platform, If i2c driver does not have backoff delay implemented,
- * then set ESE_NAD_POLLING_MAX value to higher value.
+ * As Max WTX timeout is 1sec, select ESE_NAD_POLLING_MAX count in such a way that WTX request from SE is not missed.
  *
  */
 #if defined(QN9090DK6)
 #define ESE_NAD_POLLING_MAX (2 * 30)
 #else
-#define ESE_NAD_POLLING_MAX (30) // With backoff delay implementation, this will have the read duration of ~20 seconds.
+#define ESE_NAD_POLLING_MAX (500)
 #endif
+
 /*!
  * \brief Max retry count for Write
  */

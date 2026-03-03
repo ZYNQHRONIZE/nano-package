@@ -170,15 +170,17 @@ static const char *object_type_07_02[] = {
 int ex_se05x_ReadIDList(void)
 {
     smStatus_t status;
-    uint8_t pmore = kSE05x_MoreIndicator_NA;
+    uint8_t pmore                   = kSE05x_MoreIndicator_NA;
     SE05x_SecObjTyp_t retObjectType = 0;
     const char *Object_type         = NULL;
-    uint8_t list[2048]              = {0 ,};
-    size_t listlen                  = sizeof(list);
-    uint16_t outputOffset           = 0;
-    uint16_t size                   = 0;
-    uint32_t key_len                = 0;
-    uint8_t retTransientType        = 0;
+    uint8_t list[2048]              = {
+        0,
+    };
+    size_t listlen           = sizeof(list);
+    uint16_t outputOffset    = 0;
+    uint16_t size            = 0;
+    uint32_t key_len         = 0;
+    uint8_t retTransientType = 0;
 
     ex_set_scp03_keys(&se05x_session);
     ex_set_ec_auth_keys(&se05x_session);
@@ -196,10 +198,8 @@ int ex_se05x_ReadIDList(void)
         }
         outputOffset = (uint16_t)listlen;
         for (size_t i = 0; i < listlen; i += 4) {
-            uint32_t id = 0 | ((uint32_t)list[i + 0] << (3 * 8)) |
-                ((uint32_t)list[i + 1] << (2 * 8)) |
-                ((uint32_t)list[i + 2] << (1 * 8)) |
-                ((uint32_t)list[i + 3] << (0 * 8));
+            uint32_t id = 0 | ((uint32_t)list[i + 0] << (3 * 8)) | ((uint32_t)list[i + 1] << (2 * 8)) |
+                          ((uint32_t)list[i + 2] << (1 * 8)) | ((uint32_t)list[i + 3] << (0 * 8));
 
             status =
                 Se05x_API_ReadType(&se05x_session, id, &retObjectType, &retTransientType, kSE05x_AttestationType_None);

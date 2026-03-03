@@ -1,7 +1,7 @@
 /** @file se05x_APDU_apis.h
  *  @brief Se05x apdu functions.
  *
- * Copyright 2021,2022,2024 NXP
+ * Copyright 2021,2022,2024,2026 NXP
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -1388,7 +1388,6 @@ smStatus_t Se05x_API_ReadECCurveList(pSe05xSession_t session_ctx, uint8_t *curve
  *
  * @return     The sm status.
  */
-
 smStatus_t Se05x_API_ReadObject_W_Attst(pSe05xSession_t session_ctx,
     uint32_t objectID,
     uint16_t offset,
@@ -1401,4 +1400,95 @@ smStatus_t Se05x_API_ReadObject_W_Attst(pSe05xSession_t session_ctx,
     size_t *pCmdapduLen,
     uint8_t *pRspBuf,
     size_t *pRspBufLen);
+
+/** Se05x_API_PBKDF2_extended
+ *
+ * Password Based Key Derivation Function 2 (PBKDF2) according [RFC8018].
+ *
+ * The password is an input to the KDF and must be stored inside the .
+ *
+ * The output is returned to the host.
+ *
+ *
+ * # Command to Applet
+ *
+ * @rst
+ * +-------+------------+----------------------------------------------+
+ * | Field | Value      | Description                                  |
+ * +=======+============+==============================================+
+ * | CLA   | 0x80       |                                              |
+ * +-------+------------+----------------------------------------------+
+ * | INS   | INS_CRYPTO | :cpp:type:`SE05x_INS_t`                      |
+ * +-------+------------+----------------------------------------------+
+ * | P1    | P1_DEFAULT | See :cpp:type:`SE05x_P1_t`                   |
+ * +-------+------------+----------------------------------------------+
+ * | P2    | P2_PBKDF   | See :cpp:type:`SE05x_P2_t`                   |
+ * +-------+------------+----------------------------------------------+
+ * | Lc    | #(Payload) |                                              |
+ * +-------+------------+----------------------------------------------+
+ * |       | TLV[TAG_1] | 4-byte password identifier (object type must |
+ * |       |            | be HMACKey)                                  |
+ * +-------+------------+----------------------------------------------+
+ * |       | TLV[TAG_2] | Salt (0 to 64 bytes)   [Optional]            |
+ * +-------+------------+----------------------------------------------+
+ * |       | TLV[TAG_3] | 2-byte Iteration count: 1 up to 0x7FFF.      |
+ * +-------+------------+----------------------------------------------+
+ * |       | TLV[TAG_4] | 2-byte Requested length: 1 up to 512 bytes.  |
+ * +-------+------------+----------------------------------------------+
+ * |       | TLV[TAG_5] | 1-byte MACAlgo                               |
+ * +-------+------------+----------------------------------------------+
+ * |       | TLV[TAG_6] | 4-byte HMACKey identifier containing salt.   |
+ * +-------+------------+----------------------------------------------+
+ * |       | TLV[TAG_7] | 4-byte identifier of the target Secure Object|
+ * +-------+------------+----------------------------------------------+
+ * | Le    | 0x00       | Expecting derived key material.              |
+ * +-------+------------+----------------------------------------------+
+ * @endrst
+ *
+ * # R-APDU Body
+ *
+ * @rst
+ * +------------+-------------------------------------+
+ * | Value      | Description                         |
+ * +============+=====================================+
+ * | TLV[TAG_1] | Derived key material (session key). |
+ * +------------+-------------------------------------+
+ * @endrst
+ *
+ * # R-APDU Trailer
+ *
+ * @rst
+ * +-------------+--------------------------------------+
+ * | SW          | Description                          |
+ * +=============+======================================+
+ * | SW_NO_ERROR | The command is handled successfully. |
+ * +-------------+--------------------------------------+
+ * @endrst
+ *
+ *
+ *
+ * @param[in]       session_ctx             The session context
+ * @param[in]       objectID                HMAC key object id
+ * @para m[in]      salt                    Salt data
+ * @param[in]       saltLen                 Salt length
+ * @param[in]       saltID                  Object id with salt data
+ * @param[in]       count                   Iteration count
+ * @param[in]       macAlgo                 MAC Algorithm
+ * @param[in]       requestedLen            Requested derived session key length
+ * @param[in, out]  derivedSessionKeyID     HMAC object id to store output derived session key
+ * @param[in, out]  derivedSessionKey       Buffer to store derived session key on host
+ * @param[in, out]  pderivedSessionKeyLen   DerivedSessionKey buffer length
+ */
+smStatus_t Se05x_API_PBKDF2_extended(pSe05xSession_t session_ctx,
+    uint32_t objectID,
+    const uint8_t *salt,
+    size_t saltLen,
+    uint32_t saltID,
+    uint16_t count,
+    SE05x_MACAlgo_t macAlgo,
+    uint16_t requestedLen,
+    uint32_t derivedSessionKeyID,
+    uint8_t *derivedSessionKey,
+    size_t *pderivedSessionKeyLen);
+
 #endif //#ifndef SE05X_APDU_APIS_H_INC
