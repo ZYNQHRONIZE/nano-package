@@ -1,7 +1,7 @@
 /** @file main.c
  *  @brief .
  *
- * Copyright 2026 NXP
+ * Copyright 2024 NXP
  * SPDX-License-Identifier: Apache-2.0
  */
 

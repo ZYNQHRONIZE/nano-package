@@ -23,7 +23,7 @@ int main()
 {
     platformInit();
     if (ex_se05x_mandate_scp03() != 0) {
-        PRINTF("SE05x Mandate SCP Example Failed !\r\n");
+        PRINTF("SE05x Mandate SCP Example Failed ! \r\n");
     }
     else {
         PRINTF("SE05x Mandate SCP Example Success ! \r\n");

@@ -1,7 +1,7 @@
 /** @file se05x_scp03_crypto_mbdetls.c
  *  @brief Host crypto imlementation using mbedtls.
  *
- * Copyright 2024 NXP
+ * Copyright 2024,2026 NXP
  * SPDX-License-Identifier: Apache-2.0
  */
 
